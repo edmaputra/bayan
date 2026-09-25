@@ -26,35 +26,75 @@ export function extractWikilinks(content: string): string[] {
   return Array.from(new Set(links));
 }
 
-export function getNoteFiles(): string[] {
-  if (!fs.existsSync(CONTENT_DIR)) {
-    fs.mkdirSync(CONTENT_DIR, { recursive: true });
+export interface NoteFileEntry {
+  relativePath: string;
+  fullPath: string;
+  subfolder: string;
+  slug: string;
+}
+
+export function getAllNoteFiles(dir = CONTENT_DIR, base = ''): NoteFileEntry[] {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
     return [];
   }
-  return fs.readdirSync(CONTENT_DIR).filter((file) => file.endsWith('.md'));
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  let results: NoteFileEntry[] = [];
+
+  for (const entry of entries) {
+    if (entry.name.startsWith('.')) continue;
+    const resPath = path.join(dir, entry.name);
+    const relPath = base ? path.join(base, entry.name) : entry.name;
+
+    if (entry.isDirectory()) {
+      results = results.concat(getAllNoteFiles(resPath, relPath));
+    } else if (entry.isFile() && entry.name.endsWith('.md')) {
+      const subfolder = path.dirname(relPath) === '.' ? '' : path.dirname(relPath);
+      const slug = entry.name.replace(/\.md$/, '');
+      results.push({
+        relativePath: relPath,
+        fullPath: resPath,
+        subfolder,
+        slug,
+      });
+    }
+  }
+  return results;
+}
+
+export function getNoteFiles(): string[] {
+  return getAllNoteFiles().map((f) => f.relativePath);
 }
 
 export function getAllNotes(): Note[] {
-  const files = getNoteFiles();
+  const fileEntries = getAllNoteFiles();
   const rawNotes: Array<{
     slug: string;
+    filePath: string;
+    subfolder: string;
     title: string;
     content: string;
     metadata: NoteMetadata;
     outgoingRaw: string[];
   }> = [];
 
-  for (const file of files) {
-    const slug = file.replace(/\.md$/, '');
-    const fullPath = path.join(CONTENT_DIR, file);
-    const fileContent = fs.readFileSync(fullPath, 'utf8');
+  for (const file of fileEntries) {
+    const fileContent = fs.readFileSync(file.fullPath, 'utf8');
     const parsed = matter(fileContent);
     const metadata = (parsed.data || {}) as NoteMetadata;
-    const title = metadata.title || slug.replace(/-/g, ' ');
+
+    // Fallback category if not specified in frontmatter but file is in a subfolder
+    if (!metadata.category && file.subfolder) {
+      metadata.category = file.subfolder.replace(/[\\/]/g, ' / ');
+    }
+
+    const title = metadata.title || file.slug.replace(/-/g, ' ');
     const outgoingRaw = extractWikilinks(parsed.content);
 
     rawNotes.push({
-      slug,
+      slug: file.slug,
+      filePath: file.relativePath,
+      subfolder: file.subfolder,
       title,
       content: parsed.content,
       metadata,
@@ -69,6 +109,9 @@ export function getAllNotes(): Note[] {
     titleToSlug.set(normalizeSlug(note.slug).toLowerCase(), note.slug);
     titleToSlug.set(note.title.toLowerCase(), note.slug);
     titleToSlug.set(normalizeSlug(note.title).toLowerCase(), note.slug);
+    if (note.filePath) {
+      titleToSlug.set(note.filePath.replace(/\.md$/, '').toLowerCase(), note.slug);
+    }
   }
 
   // Resolve links & calculate backlinks
@@ -86,6 +129,7 @@ export function getAllNotes(): Note[] {
 
     return {
       slug: note.slug,
+      filePath: note.filePath,
       title: note.title,
       content: note.content,
       metadata: note.metadata,
@@ -118,7 +162,14 @@ export function getAllNotes(): Note[] {
 export function getNoteBySlug(slug: string): Note | null {
   const all = getAllNotes();
   const target = slug.toLowerCase();
-  return all.find((n) => n.slug.toLowerCase() === target || normalizeSlug(n.title).toLowerCase() === target) || null;
+  return (
+    all.find(
+      (n) =>
+        n.slug.toLowerCase() === target ||
+        normalizeSlug(n.title).toLowerCase() === target ||
+        (n.filePath && n.filePath.replace(/\.md$/, '').toLowerCase() === target)
+    ) || null
+  );
 }
 
 export function saveNote(slug: string, metadata: NoteMetadata, content: string): Note {
@@ -127,10 +178,36 @@ export function saveNote(slug: string, metadata: NoteMetadata, content: string):
   }
 
   const safeSlug = normalizeSlug(slug || metadata.title || 'untitled');
-  const filePath = path.join(CONTENT_DIR, `${safeSlug}.md`);
+  const fileEntries = getAllNoteFiles();
+  const existing = fileEntries.find(
+    (f) => f.slug.toLowerCase() === safeSlug.toLowerCase() || f.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  let targetFilePath: string;
+
+  if (existing) {
+    targetFilePath = existing.fullPath;
+  } else {
+    // New note: if category provided, create/use the category folder
+    if (metadata.category && metadata.category.trim()) {
+      const catFolder = metadata.category
+        .split('/')
+        .map((p) => p.trim().replace(/[\\/:\*\?"<>\|]/g, ''))
+        .filter(Boolean)
+        .join(path.sep);
+
+      const dirPath = catFolder ? path.join(CONTENT_DIR, catFolder) : CONTENT_DIR;
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+      targetFilePath = path.join(dirPath, `${safeSlug}.md`);
+    } else {
+      targetFilePath = path.join(CONTENT_DIR, `${safeSlug}.md`);
+    }
+  }
 
   const fileData = matter.stringify(content, metadata);
-  fs.writeFileSync(filePath, fileData, 'utf8');
+  fs.writeFileSync(targetFilePath, fileData, 'utf8');
 
   return getNoteBySlug(safeSlug)!;
 }

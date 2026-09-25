@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/immutability */
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { GraphData, GraphNode, NoteType } from '@/lib/types';
-import { Maximize2, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { GraphData, GraphNode, NoteTypeDefinition } from '@/lib/types';
+import { RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 
 interface Props {
   height?: number;
@@ -12,7 +13,7 @@ interface Props {
   fullScreen?: boolean;
 }
 
-const TYPE_COLORS: Record<NoteType, { fill: string; stroke: string; glow: string }> = {
+const TYPE_COLORS: Record<string, { fill: string; stroke: string; glow: string }> = {
   concept: { fill: '#0284c7', stroke: '#38bdf8', glow: 'rgba(2, 132, 199, 0.4)' },
   hukum: { fill: '#d97706', stroke: '#fbbf24', glow: 'rgba(217, 119, 6, 0.4)' },
   dalil: { fill: '#059669', stroke: '#34d399', glow: 'rgba(5, 150, 105, 0.4)' },
@@ -38,6 +39,7 @@ export default function GraphCanvas({ height = 450, highlightSlug, onNodeClick, 
   const router = useRouter();
 
   const [data, setData] = useState<GraphData | null>(null);
+  const [typeDefs, setTypeDefs] = useState<NoteTypeDefinition[]>([]);
   const [hoveredNode, setHoveredNode] = useState<SimNode | null>(null);
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
   const [showLabels, setShowLabels] = useState(true);
@@ -49,7 +51,7 @@ export default function GraphCanvas({ height = 450, highlightSlug, onNodeClick, 
   const lastMousePosRef = useRef({ x: 0, y: 0 });
   const animFrameIdRef = useRef<number | null>(null);
 
-  // Load Graph Data
+  // Load Graph Data & Types
   useEffect(() => {
     fetch('/api/graph')
       .then((res) => res.json())
@@ -57,6 +59,15 @@ export default function GraphCanvas({ height = 450, highlightSlug, onNodeClick, 
         setData(graphData);
       })
       .catch((err) => console.error('Failed to load graph data', err));
+
+    fetch('/api/types')
+      .then((res) => res.json())
+      .then((typesData: NoteTypeDefinition[]) => {
+        if (Array.isArray(typesData)) {
+          setTypeDefs(typesData);
+        }
+      })
+      .catch((err) => console.error('Failed to load types', err));
   }, []);
 
   // Initialize Force Simulation positions
@@ -244,7 +255,11 @@ export default function GraphCanvas({ height = 450, highlightSlug, onNodeClick, 
       for (const node of nodes) {
         const isHighlighted = activeSlug ? connectedNodeIds.has(node.id) : true;
         const isHovered = hoveredNode?.id === node.id || highlightSlug === node.id;
-        const color = TYPE_COLORS[node.type] || TYPE_COLORS.concept;
+        const typeKey = (node.type || '').toLowerCase();
+        const customDef = typeDefs.find((t) => t.key.toLowerCase() === typeKey);
+        const color = customDef
+          ? { fill: customDef.color, stroke: customDef.color, glow: `${customDef.color}66` }
+          : TYPE_COLORS[node.type] || TYPE_COLORS.concept;
 
         ctx.save();
         ctx.globalAlpha = isHighlighted ? 1.0 : 0.2;
@@ -299,7 +314,7 @@ export default function GraphCanvas({ height = 450, highlightSlug, onNodeClick, 
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [transform, hoveredNode, highlightSlug, showLabels, height, fullScreen, stepSimulation]);
+  }, [transform, hoveredNode, highlightSlug, showLabels, height, fullScreen, stepSimulation, typeDefs]);
 
   // Screen to World coords
   const screenToWorld = (sx: number, sy: number) => {
@@ -367,7 +382,7 @@ export default function GraphCanvas({ height = 450, highlightSlug, onNodeClick, 
     setHoveredNode(hit);
   };
 
-  const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseUp = () => {
     if (draggingNodeRef.current) {
       draggingNodeRef.current = null;
     }
@@ -451,21 +466,25 @@ export default function GraphCanvas({ height = 450, highlightSlug, onNodeClick, 
         </button>
       </div>
 
-      {/* Legend */}
-      <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-3 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
-        <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-          <span className="w-2.5 h-2.5 rounded-full bg-sky-600 inline-block"></span> Konsep
-        </span>
-        <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block"></span> Hukum
-        </span>
-        <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span> Dalil
-        </span>
-        <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-          <span className="w-2.5 h-2.5 rounded-full bg-purple-600 inline-block"></span> Kitab
-        </span>
-      </div>
+      {/* Dynamic Legend */}
+      {typeDefs.length > 0 && (
+        <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-2.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs shadow-sm max-w-[85%]">
+          {typeDefs.map((t) => (
+            <span key={t.key} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+              <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ backgroundColor: t.color }}></span>
+              <span>{t.label}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Empty State Overlay */}
+      {data && data.nodes.length === 0 && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Belum ada simpul graf</p>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Tambahkan catatan baru untuk melihat visualisasi relasi pengetahuan.</p>
+        </div>
+      )}
     </div>
   );
 }

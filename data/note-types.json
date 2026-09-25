@@ -1,0 +1,37 @@
+[
+  {
+    "key": "concept",
+    "label": "Ushul & Konsep",
+    "icon": "FileText",
+    "color": "#0284c7",
+    "description": "Prinsip pokok, kaidah ushul fiqih, atau definisi konseptual"
+  },
+  {
+    "key": "hukum",
+    "label": "Hukum Syariat & Fiqih",
+    "icon": "Scale",
+    "color": "#d97706",
+    "description": "Ketetapan hukum syar'i (wajib, sunnah, mubah, makruh, haram)"
+  },
+  {
+    "key": "dalil",
+    "label": "Dalil (Qur'an & Sunnah)",
+    "icon": "BookOpen",
+    "color": "#059669",
+    "description": "Ayat Al-Qur'an, Hadits Nabi, atau riwayat atsari"
+  },
+  {
+    "key": "kitab",
+    "label": "Kitab & Referensi",
+    "icon": "Bookmark",
+    "color": "#7c3aed",
+    "description": "Rujukan kitab turats klasik, kitab kontemporer, atau karya ulama"
+  },
+  {
+    "key": "tokoh",
+    "label": "Tokoh & Ulama",
+    "icon": "Users",
+    "color": "#e11d48",
+    "description": "Biografi sahabat, imam madzhab, perawi, dan fuqaha"
+  }
+]

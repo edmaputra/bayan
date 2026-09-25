@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, BookOpen, Scale, FileText, Bookmark, X } from 'lucide-react';
-import { NoteType } from '@/lib/types';
+import { Search, X } from 'lucide-react';
+import { NoteType, NoteTypeDefinition } from '@/lib/types';
+import TypeIcon from './TypeIcon';
 
 interface NoteItem {
   slug: string;
@@ -24,34 +25,50 @@ export default function CommandPalette({ isOpen, onClose }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [notes, setNotes] = useState<NoteItem[]>([]);
+  const [typeDefs, setTypeDefs] = useState<NoteTypeDefinition[]>([]);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
-    if (isOpen) {
-      fetch('/api/notes')
-        .then((res) => res.json())
-        .then((data) => setNotes(data))
-        .catch((err) => console.error(err));
-      setQuery('');
-      setSelectedIndex(0);
-    }
+    if (!isOpen) return;
+    fetch('/api/notes')
+      .then((res) => res.json())
+      .then((data: NoteItem[]) => {
+        if (Array.isArray(data)) {
+          setNotes(data);
+        }
+      })
+      .catch((err) => console.error(err));
+
+    fetch('/api/types')
+      .then((res) => res.json())
+      .then((data: NoteTypeDefinition[]) => {
+        if (Array.isArray(data)) {
+          setTypeDefs(data);
+        }
+      })
+      .catch((err) => console.error(err));
   }, [isOpen]);
+
+  const handleClose = useCallback(() => {
+    setQuery('');
+    setSelectedIndex(0);
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        if (isOpen) onClose();
-        else onClose(); // parent can toggle
+        handleClose();
       }
       if (e.key === 'Escape') {
-        onClose();
+        handleClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [handleClose]);
 
   const filteredNotes = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -68,7 +85,7 @@ export default function CommandPalette({ isOpen, onClose }: Props) {
   }, [notes, query, selectedType]);
 
   const handleSelect = (slug: string) => {
-    onClose();
+    handleClose();
     router.push(`/notes/${slug}`);
   };
 
@@ -89,30 +106,30 @@ export default function CommandPalette({ isOpen, onClose }: Props) {
 
   if (!isOpen) return null;
 
+  const getTypeDefinition = (type?: NoteType) => {
+    if (!type) return null;
+    return typeDefs.find((t) => t.key.toLowerCase() === type.toLowerCase());
+  };
+
   const getTypeIcon = (type?: NoteType) => {
-    switch (type) {
-      case 'dalil':
-        return <BookOpen className="w-4 h-4 text-emerald-600" />;
-      case 'hukum':
-        return <Scale className="w-4 h-4 text-amber-600" />;
-      case 'kitab':
-        return <Bookmark className="w-4 h-4 text-purple-600" />;
-      default:
-        return <FileText className="w-4 h-4 text-sky-600" />;
-    }
+    const def = getTypeDefinition(type);
+    return (
+      <div style={{ color: def?.color || '#0284c7' }}>
+        <TypeIcon name={def?.icon || 'FileText'} className="w-4 h-4" />
+      </div>
+    );
   };
 
   const getTypeBadge = (type?: NoteType) => {
-    switch (type) {
-      case 'dalil':
-        return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Dalil</span>;
-      case 'hukum':
-        return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Hukum</span>;
-      case 'kitab':
-        return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">Kitab</span>;
-      default:
-        return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300">Konsep</span>;
-    }
+    const def = getTypeDefinition(type);
+    return (
+      <span
+        className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white shadow-xs"
+        style={{ backgroundColor: def?.color || '#0284c7' }}
+      >
+        {def?.label || type || 'Konsep'}
+      </span>
+    );
   };
 
   return (
@@ -145,23 +162,36 @@ export default function CommandPalette({ isOpen, onClose }: Props) {
 
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 text-xs overflow-x-auto">
-          {['all', 'concept', 'hukum', 'dalil', 'kitab'].map((t) => (
+          <button
+            onClick={() => {
+              setSelectedType('all');
+              setSelectedIndex(0);
+            }}
+            className={`px-3 py-1 rounded-full font-medium transition shrink-0 ${
+              selectedType === 'all'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
+            }`}
+          >
+            Semua
+          </button>
+          {typeDefs.map((t) => (
             <button
-              key={t}
+              key={t.key}
               onClick={() => {
-                setSelectedType(t);
+                setSelectedType(t.key);
                 setSelectedIndex(0);
               }}
-              className={`px-3 py-1 rounded-full font-medium transition ${
-                selectedType === t
+              className={`px-3 py-1 rounded-full font-medium transition shrink-0 ${
+                selectedType === t.key
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800'
               }`}
             >
-              {t === 'all' ? 'Semua' : t.charAt(0).toUpperCase() + t.slice(1)}
+              {t.label}
             </button>
           ))}
-          <span className="ml-auto text-slate-400 text-xs pr-1">
+          <span className="ml-auto text-slate-400 text-xs pr-1 shrink-0">
             {filteredNotes.length} hasil
           </span>
         </div>

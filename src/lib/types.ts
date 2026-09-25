@@ -1,4 +1,13 @@
-export type NoteType = 'concept' | 'hukum' | 'dalil' | 'kitab' | 'tokoh';
+export type NoteType = 'concept' | 'hukum' | 'dalil' | 'kitab' | 'tokoh' | (string & {});
+
+export interface NoteTypeDefinition {
+  key: string;
+  label: string;
+  icon: string;
+  color: string;
+  description?: string;
+  count?: number;
+}
 
 export interface NoteMetadata {
   title: string;
@@ -25,6 +34,7 @@ export interface NoteMetadata {
 
 export interface Note {
   slug: string;
+  filePath?: string; // Relative path in content/, e.g. "Fiqih/Rukun-Shalat.md"
   title: string;
   content: string;
   metadata: NoteMetadata;

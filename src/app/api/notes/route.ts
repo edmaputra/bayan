@@ -6,9 +6,10 @@ export async function GET() {
     const notes = getAllNotes();
     const summary = notes.map((n) => ({
       slug: n.slug,
+      filePath: n.filePath,
       title: n.title,
       type: n.metadata.type,
-      category: n.metadata.category,
+      category: n.metadata.category || '',
       tags: n.metadata.tags || [],
       summary: n.metadata.summary,
       arabic: n.metadata.arabic,

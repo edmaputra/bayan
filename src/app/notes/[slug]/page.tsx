@@ -2,9 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getNoteBySlug } from '@/lib/notes';
+import { getNoteTypes } from '@/lib/note-types';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import GraphCanvas from '@/components/GraphCanvas';
-import { Edit3, ArrowLeft, BookOpen, Scale, FileText, Bookmark, Share2 } from 'lucide-react';
+import TypeIcon from '@/components/TypeIcon';
+import { Edit3, ArrowLeft } from 'lucide-react';
 import { NoteType } from '@/lib/types';
 
 interface Props {
@@ -19,17 +21,22 @@ export default async function NotePage({ params }: Props) {
     notFound();
   }
 
+  const allTypes = getNoteTypes();
+  const currentTypeDef = allTypes.find(
+    (t) => t.key.toLowerCase() === (note.metadata.type || '').toLowerCase()
+  );
+
   const getTypeBadge = (type?: NoteType) => {
-    switch (type) {
-      case 'dalil':
-        return <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"><BookOpen className="w-3.5 h-3.5" /> Dalil Syariat</span>;
-      case 'hukum':
-        return <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"><Scale className="w-3.5 h-3.5" /> Hukum Fiqih</span>;
-      case 'kitab':
-        return <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300"><Bookmark className="w-3.5 h-3.5" /> Kitab Rujukan</span>;
-      default:
-        return <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300"><FileText className="w-3.5 h-3.5" /> Konsep Pokok</span>;
-    }
+    const badgeColor = currentTypeDef?.color || '#0284c7';
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full text-white shadow-xs"
+        style={{ backgroundColor: badgeColor }}
+      >
+        <TypeIcon name={currentTypeDef?.icon || 'FileText'} className="w-3.5 h-3.5" />
+        <span>{currentTypeDef?.label || type || 'Konsep Pokok'}</span>
+      </span>
+    );
   };
 
   return (

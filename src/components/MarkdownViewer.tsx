@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { ExternalLink } from 'lucide-react';
 import { NoteType } from '@/lib/types';
-import { ExternalLink, BookOpen, Scale, FileText, Bookmark } from 'lucide-react';
 
 interface Props {
   content: string;

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { NoteMetadata, NoteType } from '@/lib/types';
+import { NoteMetadata, NoteType, NoteTypeDefinition } from '@/lib/types';
 import MarkdownViewer from './MarkdownViewer';
 import { Save, ArrowLeft, Eye, Edit3, Link as LinkIcon, Quote } from 'lucide-react';
 
@@ -21,7 +21,9 @@ export default function NoteEditor({
 }: Props) {
   const router = useRouter();
 
-  const [slug, setSlug] = useState(initialSlug);
+  const [slug] = useState(initialSlug);
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
+  const [availableTypes, setAvailableTypes] = useState<NoteTypeDefinition[]>([]);
   const [metadata, setMetadata] = useState<NoteMetadata>(
     initialMetadata || {
       title: '',
@@ -41,7 +43,30 @@ export default function NoteEditor({
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [saving, setSaving] = useState(false);
 
-  const handleMetadataChange = (key: keyof NoteMetadata, val: any) => {
+  React.useEffect(() => {
+    fetch('/api/notes')
+      .then((res) => res.json())
+      .then((data: Array<{ category?: string }>) => {
+        if (Array.isArray(data)) {
+          const cats = Array.from(
+            new Set(data.map((d) => d.category?.trim()).filter((c): c is string => Boolean(c)))
+          ).sort();
+          setExistingCategories(cats);
+        }
+      })
+      .catch((err) => console.error(err));
+
+    fetch('/api/types')
+      .then((res) => res.json())
+      .then((typesData: NoteTypeDefinition[]) => {
+        if (Array.isArray(typesData)) {
+          setAvailableTypes(typesData);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  const handleMetadataChange = <K extends keyof NoteMetadata>(key: K, val: NoteMetadata[K]) => {
     setMetadata((prev) => ({ ...prev, [key]: val }));
   };
 
@@ -97,8 +122,9 @@ export default function NoteEditor({
 
       router.push(`/notes/${targetSlug}`);
       router.refresh();
-    } catch (err: any) {
-      alert(err.message || 'Terjadi kesalahan');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan';
+      alert(msg);
     } finally {
       setSaving(false);
     }
@@ -186,10 +212,21 @@ export default function NoteEditor({
               onChange={(e) => handleMetadataChange('type', e.target.value as NoteType)}
               className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:border-emerald-500"
             >
-              <option value="concept">Ushul / Konsep Pokok</option>
-              <option value="hukum">Hukum Syariat / Fiqih</option>
-              <option value="dalil">Dalil (Al-Qur&apos;an / Hadits)</option>
-              <option value="kitab">Kitab & Referensi</option>
+              {availableTypes.length > 0 ? (
+                availableTypes.map((t) => (
+                  <option key={t.key} value={t.key}>
+                    {t.label}
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="concept">Ushul / Konsep Pokok</option>
+                  <option value="hukum">Hukum Syariat / Fiqih</option>
+                  <option value="dalil">Dalil (Al-Qur&apos;an / Hadits)</option>
+                  <option value="kitab">Kitab & Referensi</option>
+                  <option value="tokoh">Tokoh & Ulama</option>
+                </>
+              )}
             </select>
           </div>
         </div>
@@ -216,11 +253,20 @@ export default function NoteEditor({
             </label>
             <input
               type="text"
+              list="category-suggestions"
               value={metadata.category || ''}
               onChange={(e) => handleMetadataChange('category', e.target.value)}
-              placeholder="Contoh: Fiqih Ibadah, Aqidah..."
+              placeholder="Contoh: Fiqih Ibadah, Aqidah, Hadits..."
               className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:border-emerald-500"
             />
+            <datalist id="category-suggestions">
+              {existingCategories.map((cat) => (
+                <option key={cat} value={cat} />
+              ))}
+            </datalist>
+            <span className="text-[11px] text-slate-400 mt-1 block">
+              Pilih dari kategori yang ada atau ketik baru (berkas akan otomatis diorganisir).
+            </span>
           </div>
         </div>
 
@@ -233,7 +279,7 @@ export default function NoteEditor({
               </label>
               <select
                 value={metadata.source_type || 'Hadits'}
-                onChange={(e) => handleMetadataChange('source_type', e.target.value)}
+                onChange={(e) => handleMetadataChange('source_type', e.target.value as NoteMetadata['source_type'])}
                 className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
                 <option value="Al-Qur'an">Al-Qur&apos;an</option>

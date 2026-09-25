@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Network, BookOpen } from 'lucide-react';
+import { Search, Plus, Network, Settings } from 'lucide-react';
 import CommandPalette from './CommandPalette';
 
 export default function Navbar() {
@@ -61,6 +61,14 @@ export default function Navbar() {
             >
               <Network className="w-4 h-4 text-emerald-600" />
               <span className="hidden sm:inline">Peta Graph</span>
+            </Link>
+
+            <Link
+              href="/settings"
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition"
+              title="Pengaturan Tipe & Taksonomi"
+            >
+              <Settings className="w-4 h-4" />
             </Link>
 
             <Link
