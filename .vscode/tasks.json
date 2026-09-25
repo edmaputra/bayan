@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Next.js: Start Dev Server (npm run dev)",
+      "type": "shell",
+      "command": "npm run dev",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc-watch",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*(Starting|Building|Compiling).*",
+          "endsPattern": ".*(Ready|Compiled|Finished).*"
+        }
+      }
+    },
+    {
+      "label": "Next.js: Build (npm run build)",
+      "type": "shell",
+      "command": "npm run build",
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "Next.js: Start Production Server (npm run start)",
+      "type": "shell",
+      "command": "npm run start",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Next.js: Lint (npm run lint)",
+      "type": "shell",
+      "command": "npm run lint",
+      "problemMatcher": "$eslint-stylish"
+    },
+    {
+      "label": "TypeScript: Type Check (npx tsc --noEmit)",
+      "type": "shell",
+      "command": "npx tsc --noEmit",
+      "problemMatcher": "$tsc"
+    }
+  ]
+}

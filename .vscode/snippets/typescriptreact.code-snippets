@@ -1,0 +1,100 @@
+{
+  "Next.js App Router Page": {
+    "prefix": "next-page",
+    "body": [
+      "import type { Metadata } from 'next';",
+      "",
+      "export const metadata: Metadata = {",
+      "  title: '${1:Page Title}',",
+      "  description: '${2:Page description}',",
+      "};",
+      "",
+      "interface ${3:Page}Props {",
+      "  params: Promise<{ ${4:slug}: string }>;",
+      "  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;",
+      "}",
+      "",
+      "export default async function ${3:Page}Page(props: ${3:Page}Props) {",
+      "  const params = await props.params;",
+      "  const searchParams = await props.searchParams;",
+      "",
+      "  return (",
+      "    <main className=\"container mx-auto px-4 py-8\">",
+      "      <h1 className=\"text-3xl font-bold\">${1:Page Title}</h1>",
+      "      $0",
+      "    </main>",
+      "  );",
+      "}"
+    ],
+    "description": "Next.js App Router Page (Server Component with async params & metadata)"
+  },
+  "Next.js App Router Layout": {
+    "prefix": "next-layout",
+    "body": [
+      "interface ${1:Layout}Props {",
+      "  children: React.ReactNode;",
+      "}",
+      "",
+      "export default function ${1:Layout}Layout({ children }: ${1:Layout}Props) {",
+      "  return (",
+      "    <div className=\"min-h-screen flex flex-col\">",
+      "      <section className=\"flex-1\">{children}</section>",
+      "    </div>",
+      "  );",
+      "}"
+    ],
+    "description": "Next.js App Router Layout Component"
+  },
+  "Next.js Client Component": {
+    "prefix": "next-client",
+    "body": [
+      "'use client';",
+      "",
+      "import { useState } from 'react';",
+      "",
+      "interface ${1:Component}Props {",
+      "  ${2:className}?: string;",
+      "}",
+      "",
+      "export function ${1:Component}({ ${2:className} }: ${1:Component}Props) {",
+      "  const [state, setState] = useState(false);",
+      "",
+      "  return (",
+      "    <div className={${2:className}}>",
+      "      $0",
+      "    </div>",
+      "  );",
+      "}"
+    ],
+    "description": "Next.js Client Component with use client directive"
+  },
+  "Next.js Server Action": {
+    "prefix": "next-action",
+    "body": [
+      "'use server';",
+      "",
+      "import { revalidatePath } from 'next/cache';",
+      "",
+      "export async function ${1:actionName}(formData: FormData) {",
+      "  $0",
+      "}"
+    ],
+    "description": "Next.js Server Action with use server"
+  },
+  "Next.js Route Handler": {
+    "prefix": "next-route",
+    "body": [
+      "import { NextResponse } from 'next/server';",
+      "",
+      "export async function GET(request: Request) {",
+      "  return NextResponse.json({ message: 'Hello World' });",
+      "}",
+      "",
+      "export async function POST(request: Request) {",
+      "  const body = await request.json();",
+      "  return NextResponse.json({ data: body }, { status: 201 });",
+      "}"
+    ],
+    "description": "Next.js API Route Handler (app/api/.../route.ts)"
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "name": "Next.js",
+  "icon": "globe",
+  "settings": "{\n  \"typescript.tsdk\": \"node_modules/typescript/lib\",\n  \"typescript.enablePromptUseWorkspaceTsdk\": true,\n  \"typescript.suggest.completeFunctionCalls\": true,\n  \"javascript.suggest.completeFunctionCalls\": true,\n  \"typescript.inlayHints.parameterNames.enabled\": \"all\",\n  \"typescript.inlayHints.parameterNames.suppressWhenArgumentMatchesName\": true,\n  \"typescript.inlayHints.parameterTypes.enabled\": true,\n  \"typescript.inlayHints.variableTypes.enabled\": true,\n  \"typescript.inlayHints.propertyDeclarationTypes.enabled\": true,\n  \"typescript.inlayHints.functionLikeReturnTypes.enabled\": true,\n  \"typescript.inlayHints.enumMemberValues.enabled\": true,\n  \"javascript.inlayHints.parameterNames.enabled\": \"all\",\n  \"javascript.inlayHints.variableTypes.enabled\": true,\n  \"javascript.inlayHints.functionLikeReturnTypes.enabled\": true,\n  \"editor.hover.enabled\": \"on\",\n  \"editor.hover.delay\": 300,\n  \"editor.hover.sticky\": true,\n  \"editor.parameterHints.enabled\": true,\n  \"editor.parameterHints.cycle\": true,\n  \"editor.quickSuggestions\": {\n    \"other\": \"on\",\n    \"comments\": \"off\",\n    \"strings\": \"on\"\n  },\n  \"editor.suggestSelection\": \"first\",\n  \"editor.tabSize\": 2,\n  \"editor.insertSpaces\": true,\n  \"editor.linkedEditing\": true,\n  \"editor.formatOnSave\": true,\n  \"editor.defaultFormatter\": \"esbenp.prettier-vscode\",\n  \"editor.codeActionsOnSave\": {\n    \"source.organizeImports\": \"explicit\",\n    \"source.fixAll.eslint\": \"explicit\"\n  },\n  \"[typescript]\": {\n    \"editor.defaultFormatter\": \"esbenp.prettier-vscode\"\n  },\n  \"[typescriptreact]\": {\n    \"editor.defaultFormatter\": \"esbenp.prettier-vscode\"\n  },\n  \"[javascript]\": {\n    \"editor.defaultFormatter\": \"esbenp.prettier-vscode\"\n  },\n  \"[javascriptreact]\": {\n    \"editor.defaultFormatter\": \"esbenp.prettier-vscode\"\n  },\n  \"[json]\": {\n    \"editor.defaultFormatter\": \"esbenp.prettier-vscode\"\n  },\n  \"[jsonc]\": {\n    \"editor.defaultFormatter\": \"esbenp.prettier-vscode\"\n  },\n  \"[css]\": {\n    \"editor.defaultFormatter\": \"esbenp.prettier-vscode\"\n  },\n  \"[markdown]\": {\n    \"editor.defaultFormatter\": \"esbenp.prettier-vscode\"\n  },\n  \"[mdx]\": {\n    \"editor.defaultFormatter\": \"esbenp.prettier-vscode\"\n  },\n  \"eslint.useFlatConfig\": true,\n  \"eslint.validate\": [\n    \"javascript\",\n    \"javascriptreact\",\n    \"typescript\",\n    \"typescriptreact\"\n  ],\n  \"tailwindCSS.includeLanguages\": {\n    \"typescript\": \"javascript\",\n    \"typescriptreact\": \"javascript\",\n    \"html\": \"html\",\n    \"markdown\": \"html\",\n    \"mdx\": \"html\"\n  },\n  \"tailwindCSS.experimental.classRegex\": [\n    [\n      \"clsx\\\\(([^)]*)\\\\)\",\n      \"(?:'|\\\"|`)([^']*)(?:'|\\\"|`)\"\n    ],\n    [\n      \"cn\\\\(([^)]*)\\\\)\",\n      \"(?:'|\\\"|`)([^']*)(?:'|\\\"|`)\"\n    ],\n    [\n      \"cva\\\\(([^)]*)\\\\)\",\n      \"(?:'|\\\"|`)([^']*)(?:'|\\\"|`)\"\n    ]\n  ],\n  \"tailwindCSS.emmetCompletions\": true,\n  \"tailwindCSS.showPixelEquivalents\": true,\n  \"emmet.includeLanguages\": {\n    \"typescriptreact\": \"html\",\n    \"javascriptreact\": \"html\"\n  },\n  \"files.exclude\": {\n    \"**/.git\": true,\n    \"**/.svn\": true,\n    \"**/.hg\": true,\n    \"**/CVS\": true,\n    \"**/.DS_Store\": true,\n    \"**/Thumbs.db\": true,\n    \"**/.next\": true,\n    \"**/node_modules\": true\n  },\n  \"search.exclude\": {\n    \"**/node_modules\": true,\n    \"**/.next\": true,\n    \"**/package-lock.json\": true\n  }\n}",
+  "tasks": "{\n  \"version\": \"2.0.0\",\n  \"tasks\": [\n    {\n      \"label\": \"Next.js: Start Dev Server (npm run dev)\",\n      \"type\": \"shell\",\n      \"command\": \"npm run dev\",\n      \"group\": {\n        \"kind\": \"build\",\n        \"isDefault\": true\n      },\n      \"isBackground\": true,\n      \"problemMatcher\": {\n        \"owner\": \"typescript\",\n        \"pattern\": \"$tsc-watch\",\n        \"background\": {\n          \"activeOnStart\": true,\n          \"beginsPattern\": \".*(Starting|Building|Compiling).*\",\n          \"endsPattern\": \".*(Ready|Compiled|Finished).*\"\n        }\n      }\n    },\n    {\n      \"label\": \"Next.js: Build (npm run build)\",\n      \"type\": \"shell\",\n      \"command\": \"npm run build\",\n      \"group\": \"build\",\n      \"problemMatcher\": \"$tsc\"\n    },\n    {\n      \"label\": \"Next.js: Start Production Server (npm run start)\",\n      \"type\": \"shell\",\n      \"command\": \"npm run start\",\n      \"isBackground\": true,\n      \"problemMatcher\": []\n    },\n    {\n      \"label\": \"Next.js: Lint (npm run lint)\",\n      \"type\": \"shell\",\n      \"command\": \"npm run lint\",\n      \"problemMatcher\": \"$eslint-stylish\"\n    },\n    {\n      \"label\": \"TypeScript: Type Check (npx tsc --noEmit)\",\n      \"type\": \"shell\",\n      \"command\": \"npx tsc --noEmit\",\n      \"problemMatcher\": \"$tsc\"\n    }\n  ]\n}",
+  "snippets": {
+    "typescriptreact": "{\n  \"Next.js App Router Page\": {\n    \"prefix\": \"next-page\",\n    \"body\": [\n      \"import type { Metadata } from 'next';\",\n      \"\",\n      \"export const metadata: Metadata = {\",\n      \"  title: '${1:Page Title}',\",\n      \"  description: '${2:Page description}',\",\n      \"};\",\n      \"\",\n      \"interface ${3:Page}Props {\",\n      \"  params: Promise<{ ${4:slug}: string }>;\",\n      \"  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;\",\n      \"}\",\n      \"\",\n      \"export default async function ${3:Page}Page(props: ${3:Page}Props) {\",\n      \"  const params = await props.params;\",\n      \"  const searchParams = await props.searchParams;\",\n      \"\",\n      \"  return (\",\n      \"    <main className=\\\"container mx-auto px-4 py-8\\\">\",\n      \"      <h1 className=\\\"text-3xl font-bold\\\">${1:Page Title}</h1>\",\n      \"      $0\",\n      \"    </main>\",\n      \"  );\",\n      \"}\"\n    ],\n    \"description\": \"Next.js App Router Page (Server Component with async params & metadata)\"\n  },\n  \"Next.js App Router Layout\": {\n    \"prefix\": \"next-layout\",\n    \"body\": [\n      \"interface ${1:Layout}Props {\",\n      \"  children: React.ReactNode;\",\n      \"}\",\n      \"\",\n      \"export default function ${1:Layout}Layout({ children }: ${1:Layout}Props) {\",\n      \"  return (\",\n      \"    <div className=\\\"min-h-screen flex flex-col\\\">\",\n      \"      <section className=\\\"flex-1\\\">{children}</section>\",\n      \"    </div>\",\n      \"  );\",\n      \"}\"\n    ],\n    \"description\": \"Next.js App Router Layout Component\"\n  },\n  \"Next.js Client Component\": {\n    \"prefix\": \"next-client\",\n    \"body\": [\n      \"'use client';\",\n      \"\",\n      \"import { useState } from 'react';\",\n      \"\",\n      \"interface ${1:Component}Props {\",\n      \"  ${2:className}?: string;\",\n      \"}\",\n      \"\",\n      \"export function ${1:Component}({ ${2:className} }: ${1:Component}Props) {\",\n      \"  const [state, setState] = useState(false);\",\n      \"\",\n      \"  return (\",\n      \"    <div className={${2:className}}>\",\n      \"      $0\",\n      \"    </div>\",\n      \"  );\",\n      \"}\"\n    ],\n    \"description\": \"Next.js Client Component with use client directive\"\n  },\n  \"Next.js Server Action\": {\n    \"prefix\": \"next-action\",\n    \"body\": [\n      \"'use server';\",\n      \"\",\n      \"import { revalidatePath } from 'next/cache';\",\n      \"\",\n      \"export async function ${1:actionName}(formData: FormData) {\",\n      \"  $0\",\n      \"}\"\n    ],\n    \"description\": \"Next.js Server Action with use server\"\n  },\n  \"Next.js Route Handler\": {\n    \"prefix\": \"next-route\",\n    \"body\": [\n      \"import { NextResponse } from 'next/server';\",\n      \"\",\n      \"export async function GET(request: Request) {\",\n      \"  return NextResponse.json({ message: 'Hello World' });\",\n      \"}\",\n      \"\",\n      \"export async function POST(request: Request) {\",\n      \"  const body = await request.json();\",\n      \"  return NextResponse.json({ data: body }, { status: 201 });\",\n      \"}\"\n    ],\n    \"description\": \"Next.js API Route Handler (app/api/.../route.ts)\"\n  }\n}"
+  },
+  "extensions": [
+    {
+      "identifier": {
+        "id": "unifiedjs.vscode-mdx",
+        "uuid": "af8cfc85-cb72-45d0-bae2-9a98cd0c69f3"
+      },
+      "displayName": "unifiedjs.vscode-mdx"
+    },
+    {
+      "identifier": {
+        "id": "formulahendry.auto-rename-tag",
+        "uuid": "6e440e71-8ed9-4f25-bb78-4b13096b8a03"
+      },
+      "displayName": "formulahendry.auto-rename-tag"
+    },
+    {
+      "identifier": {
+        "id": "formulahendry.auto-close-tag",
+        "uuid": "d3836729-9cc1-42c1-b2af-d50071f57d29"
+      },
+      "displayName": "formulahendry.auto-close-tag"
+    },
+    {
+      "identifier": {
+        "id": "dsznajder.es7-react-js-snippets",
+        "uuid": "19804510-b475-4dae-b0f7-6ca08fd1af0c"
+      },
+      "displayName": "dsznajder.es7-react-js-snippets"
+    },
+    {
+      "identifier": {
+        "id": "mikestead.dotenv",
+        "uuid": "532533c9-a894-4a58-9eee-bbfbe7c06f71"
+      },
+      "displayName": "mikestead.dotenv"
+    },
+    {
+      "identifier": {
+        "id": "bradlc.vscode-tailwindcss",
+        "uuid": "4db62a7c-7d70-419c-96d2-6c3a4dc77ea5"
+      },
+      "displayName": "bradlc.vscode-tailwindcss"
+    },
+    {
+      "identifier": {
+        "id": "dbaeumer.vscode-eslint",
+        "uuid": "583b2b34-2c1e-4634-8c0b-0b82e283ea3a"
+      },
+      "displayName": "dbaeumer.vscode-eslint"
+    },
+    {
+      "identifier": {
+        "id": "editorconfig.editorconfig",
+        "uuid": "f60a60a6-95ba-42d4-b41c-3d24c1b89588"
+      },
+      "displayName": "editorconfig.editorconfig"
+    },
+    {
+      "identifier": {
+        "id": "esbenp.prettier-vscode",
+        "uuid": "96fa4707-6983-4489-b7c5-d5ffdfdcce90"
+      },
+      "displayName": "esbenp.prettier-vscode"
+    },
+    {
+      "identifier": {
+        "id": "eamodio.gitlens",
+        "uuid": "4de763bd-505d-4978-9575-2b7696ecf94e"
+      },
+      "displayName": "eamodio.gitlens"
+    },
+    {
+      "identifier": {
+        "id": "christian-kohler.npm-intellisense"
+      },
+      "displayName": "christian-kohler.npm-intellisense"
+    }
+  ]
+}
